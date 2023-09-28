@@ -1,5 +1,6 @@
 from flask import Flask, jsonify,request
 from flask_cors import CORS, cross_origin
+from dotenv import dotenv_values
 import sqlite3
 
 def criarTable():
@@ -77,6 +78,9 @@ def buscar():
     lista = getTable()
     return jsonify(lista)
 
+ 
+config = dotenv_values(".env" )
+print(config['PORT'])
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=1000)
+    app.run(port=config['PORT'])
