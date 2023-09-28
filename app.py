@@ -79,8 +79,8 @@ def buscar():
     return jsonify(lista)
 
  
-config = dotenv_values(".env" )
-print(config['PORT'])
+#config = dotenv_values(".env" )
+#print(config['PORT'])
 
 if __name__ == '__main__':
-    app.run(port=config['PORT'])
+    app.run(port="10000")
