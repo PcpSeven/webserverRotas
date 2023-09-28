@@ -2,86 +2,57 @@ from flask import Flask, jsonify,request
 from flask_cors import CORS, cross_origin
 from dotenv import dotenv_values
 import os
-import sqlite3
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
 
-def criarTable():
-    banco  = sqlite3.connect('ControleDeRotasSeven.bd')
-    cursor = banco.cursor()
-    cursor.execute('CREATE TABLE carros (FUNCIONARIO text,CARRO text, DATAHORA datetime , SAIDACHEGADA text, ROTA text, KM text, LOCALIZACAO text)')
-    banco.commit()
-    cursor.close()
+
+uri = "mongodb+srv://pcpsevendf:Solutions212@cluster.xvt5sij.mongodb.net/?retryWrites=true&w=majority"
+client = MongoClient(uri, server_api=ServerApi('1'))
+db_connection = client['controlerotas']
+colecao = db_connection.get_collection('carros')
+
+def buscarColecao():
+    resultadoFInal = []
+    resultado = colecao.find()
+    for i in resultado:
+        resultadoFInal.append({
+            "carro":i['carro'],
+            'motorista':i['motorista'],
+            "chegadaSaida":i['chegadaSaida'],
+            "dataHora":i['dataHora'],
+            "rota":i['rota'],
+            "km":i['km'],
+            "loc":i['loc'],
+            "obs":i["obs"],
+        })
+    return resultadoFInal
+        
 
 def Inserir(content):
-    banco  = sqlite3.connect('ControleDeRotasSeven.bd')
-    cursor = banco.cursor()
-    lista = [
-        content['motorista'],content['carro'],content['dataHora'],content['chegadaSaida'],content['rota'],content['km'],content['loc']
-    ]
-    cursor.execute('INSERT INTO carros VALUES(?,?,?,?,?,?,?)',lista)
-    banco.commit()
-    cursor.close()
-
-
-def getTable():
-    lista = []
-    try:
-        connection = sqlite3.connect('ControleDeRotasSeven.bd')
-        cursor = connection.cursor()
-        sqlite_select_query = """SELECT * FROM carros"""
-        print(sqlite_select_query)
-        cursor.execute(sqlite_select_query)
-        obj = cursor.fetchall()
-        for i in obj:
-            lista.append({'FUNCIONARIO':i[0], "CARRO": i[1],"DATAHORA":i[3], "SAIDACHEGADA":i[2],"ROTA":i[4],"KM":i[5],"LOCALIZACAO":i[6]})
-        cursor.close()
-        return lista
-    except sqlite3.Error as error:
-        print("Failed to read data from table", error)
-    finally:
-        if connection:
-            connection.close()
-            print("The Sqlite connection is closed")
-
-
-def DropTable(tabela,limparlista):
-    try:
-        banco  = sqlite3.connect('bdPainel.bd')
-        cursor = banco.cursor()
-        cursor.execute('DROP TABLE '+str(tabela)+'')
-        banco.commit()
-        cursor.close()
-        limparlista.clear()
-        print('tabela deletada')
-    except: print('Nao tem tabela')
+    print(content)
+    colecao.insert_one(content)
 
 
 app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
+
 #       Adiciona item na tabela
-@app.route("/",methods = ['POST'])
-def responder():
+@app.route("/", methods = ['POST'])
+def receber():
     content = request.json
     Inserir(content)
-    print(content)
     return '200'
 
-#       Criar Tabela
-@app.route("/criar",methods = ['GET'])
-def criar():
-    criarTable()
-    return '200'
 
 #       Retorno a tabela
-@app.route("/buscar",methods = ['GET'])
+@app.route("/",methods = ['GET'])
 def buscar():
-    lista = getTable()
-    return jsonify(lista)
+    result = buscarColecao()
+    return jsonify(result)
 
- 
-#config = dotenv_values(".env" )
-#print(config['PORT'])
+
 
 if __name__ == '__main__':
     host = os.getenv('FLASK_HOST', '0.0.0.0')
