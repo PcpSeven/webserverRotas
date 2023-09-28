@@ -6,10 +6,17 @@ from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 
 
-uri = "mongodb+srv://pcpsevendf:Solutions212@cluster.xvt5sij.mongodb.net/?retryWrites=true&w=majority"
+config = dotenv_values(".env")
+
+uri = config['URI']
 client = MongoClient(uri, server_api=ServerApi('1'))
 db_connection = client['controlerotas']
 colecao = db_connection.get_collection('carros')
+
+#colecao.insert_one({'carro':'FIORINO'})
+#colecao.insert_one({'carro':'PALIO'})
+#resultado = colecao.find({'carro':'PALIO'})
+
 
 def buscarColecao():
     resultadoFInal = []
