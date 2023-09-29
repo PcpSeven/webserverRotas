@@ -50,14 +50,21 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 def receber():
     content = request.json
     Inserir(content)
-    return '200'
+    data = {'message': 'SUCCESS'}
+    return (jsonify(data), 201)
 
 
 #       Retorno a tabela
 @app.route("/",methods = ['GET'])
 def buscar():
     result = buscarColecao()
-    return jsonify(result)
+    return (jsonify(result),200)
+
+# ativar api
+@app.route("/ativar",methods = ['GET'])
+def ativar():
+    data = {'message': 'SUCCESS'}
+    return (jsonify(data), 201)
 
 
 
